@@ -59,14 +59,28 @@ def main():
     ap.add_argument("--resume", type=str, default=None,
                     help="Path to checkpoint to resume from")
     ap.add_argument("--epochs", type=int, default=40)
+    ap.add_argument("--mask_mode", choices=["block", "random"], default="block",
+                    help="block = I-JEPA-style rectangular targets (default); "
+                         "random = legacy per-patch mask (v1 behavior)")
+    ap.add_argument("--mask_ratio", type=float, default=None,
+                    help="Default: 0.4 for block, 0.75 for random")
+    ap.add_argument("--n_blocks", type=int, default=4,
+                    help="Number of rectangular target blocks (block mode only)")
     args = ap.parse_args()
+
+    if args.mask_ratio is None:
+        args.mask_ratio = 0.4 if args.mask_mode == "block" else 0.75
+    print(f"[cfg] mask_mode={args.mask_mode} mask_ratio={args.mask_ratio} "
+          f"n_blocks={args.n_blocks}", flush=True)
 
     device = "cuda"
     ds = SliceTriplet()
     dl = DataLoader(ds, batch_size=32, shuffle=True,
                     num_workers=4, pin_memory=True, persistent_workers=True,
                     prefetch_factor=2)
-    model = ZMWM_JEPA().to(device)
+    model = ZMWM_JEPA(mask_ratio=args.mask_ratio,
+                      mask_mode=args.mask_mode,
+                      n_blocks=args.n_blocks).to(device)
     opt = torch.optim.AdamW(
         list(model.context_enc.parameters()) + list(model.predictor.parameters()),
         lr=1.5e-4, weight_decay=0.05)
