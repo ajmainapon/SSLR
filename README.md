@@ -72,8 +72,11 @@ gradient accumulation. Authored on Apple Silicon.
 
 ## Status
 
-Active research. Details on architecture choices, training dynamics, and
-experimental results are tracked in the project notes alongside this repository.
+Active research. Phase 1 self-supervised pretraining and Phase 2 few-shot
+linear-probe evaluation are complete; pretrained features outperform random
+initialization on the standard probe protocol. Phase 3 (zero-shot causal
+masking) is the next milestone. Detailed experimental notes and results are
+tracked in the project notes alongside this repository.
 
 ## References
 
