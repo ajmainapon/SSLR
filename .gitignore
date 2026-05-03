@@ -3,6 +3,12 @@
 /data/
 /checkpoints/
 
+# nnU-Net baseline (raw, preprocessed, results, predictions)
+/nnUNet_raw/
+/nnUNet_preprocessed/
+/nnUNet_results/
+/predictions/
+
 # Virtual environment
 /venv/
 /env/
