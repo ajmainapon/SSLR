@@ -10,7 +10,10 @@ KEEP = 3
 SAVE_EVERY = 500
 
 def rotate(pattern, keep=KEEP):
-    files = sorted(glob.glob(pattern))
+    # Sort by mtime so a newly-saved checkpoint is always considered "newest",
+    # even when it sorts before older files lexically (e.g. ep000 vs ep039
+    # left over from a prior run -- the alphabetical sort would prune ep000).
+    files = sorted(glob.glob(pattern), key=os.path.getmtime)
     for f in files[:-keep]:
         os.remove(f)
 
