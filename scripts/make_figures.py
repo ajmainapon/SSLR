@@ -30,8 +30,9 @@ ORGANS = [
 
 
 def load_runs(runs_root):
-    """Return list of {dir, head, init, n, ckpt, log} for every valid run dir."""
-    out = []
+    """Return list of {dir, head, init, n, ckpt, log} for every valid run dir.
+    Skips runs that finished before their first eval epoch (no val_fg in log)."""
+    out, skipped = [], []
     for d in sorted(Path(runs_root).iterdir()):
         if not d.is_dir():
             continue
@@ -40,7 +41,8 @@ def load_runs(runs_root):
             continue
         args = json.loads(args_p.read_text())
         log = json.loads(log_p.read_text())
-        if not log:
+        if not log or not any("val_fg" in e for e in log):
+            skipped.append(d.name)
             continue
         out.append({
             "dir":  d.name,
@@ -50,11 +52,14 @@ def load_runs(runs_root):
             "ckpt": args.get("ckpt"),
             "log":  log,
         })
+    if skipped:
+        print(f"[skipped] {len(skipped)} runs with no val_fg eval: {skipped}")
     return out
 
 
 def best_val_fg(log):
-    return max(e["val_fg"] for e in log if "val_fg" in e)
+    vals = [e["val_fg"] for e in log if "val_fg" in e]
+    return max(vals) if vals else float("nan")
 
 
 def best_per_class(log):
