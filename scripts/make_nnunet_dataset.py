@@ -108,7 +108,11 @@ def main():
                     help="e.g. nnUNet_raw/Dataset001_Organ")
     ap.add_argument("--max_val", type=int, default=None,
                     help="Optional cap on val patients (useful for quick smoke test)")
+    ap.add_argument("--copy", action="store_true",
+                    help="Copy source CTs into nnUNet_raw instead of symlinking. "
+                         "Default is symlink (saves ~15-25 GB).")
     args = ap.parse_args()
+    link_mode = "copy" if args.copy else "symlink"
 
     train_pids = json.loads(Path(args.train_volumes_json).read_text())
     val_pids = derive_val_pids(args.val_labels_dir)
@@ -128,11 +132,11 @@ def main():
     ts_root = Path(args.ts_root)
     n_tr_ok = 0
     for pid in tqdm(train_pids, desc="train"):
-        if write_pair(pid, ts_root, img_tr, lbl_tr):
+        if write_pair(pid, ts_root, img_tr, lbl_tr, link_mode=link_mode):
             n_tr_ok += 1
     n_ts_ok = 0
     for pid in tqdm(val_pids, desc="val"):
-        if write_pair(pid, ts_root, img_ts, lbl_ts):
+        if write_pair(pid, ts_root, img_ts, lbl_ts, link_mode=link_mode):
             n_ts_ok += 1
 
     # Write nnU-Net v2 dataset.json
