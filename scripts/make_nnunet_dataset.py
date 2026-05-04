@@ -25,7 +25,7 @@ Usage:
       --ts_root totalsegmentator \\
       --out nnUNet_raw/Dataset001_Organ
 """
-import argparse, json, shutil
+import argparse, json, os, shutil
 from pathlib import Path
 
 import numpy as np
@@ -60,10 +60,14 @@ def fuse_organs(seg_dir, ref_shape):
     return fused
 
 
-def write_pair(pid, ts_root, img_out_dir, lbl_out_dir):
-    """Copy CT + write fused label NIfTI for one patient.
+def write_pair(pid, ts_root, img_out_dir, lbl_out_dir, link_mode="symlink"):
+    """Place CT in img_out_dir and write fused label NIfTI to lbl_out_dir.
+
+    link_mode:
+      "symlink" (default) -- link to the source CT, near-zero disk cost.
+      "copy"              -- duplicate the CT (safer for archival use).
     Returns True if successful."""
-    ct_p = ts_root / pid / "ct.nii.gz"
+    ct_p = (ts_root / pid / "ct.nii.gz").resolve()
     seg_dir = ts_root / pid / "segmentations"
     if not (ct_p.exists() and seg_dir.exists()):
         print(f"[skip] {pid}: missing ct or segmentations dir")
@@ -73,9 +77,13 @@ def write_pair(pid, ts_root, img_out_dir, lbl_out_dir):
     if fused.sum() == 0:
         print(f"[skip] {pid}: empty fused label")
         return False
-    # Copy CT untouched (preserve header/affine for nnU-Net)
+    # Place CT (symlink by default; saves ~50-100 MB per patient)
     img_dst = img_out_dir / f"{pid}_0000.nii.gz"
-    if not img_dst.exists():
+    if img_dst.exists() or img_dst.is_symlink():
+        img_dst.unlink()
+    if link_mode == "symlink":
+        os.symlink(ct_p, img_dst)
+    else:
         shutil.copy(ct_p, img_dst)
     # Write fused label with the CT's affine + header
     lbl_img = nib.Nifti1Image(fused, ct_nib.affine, ct_nib.header)
