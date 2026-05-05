@@ -72,11 +72,14 @@ gradient accumulation. Authored on Apple Silicon.
 
 ## Status
 
-Active research. Phase 1 self-supervised pretraining and Phase 2 few-shot
-linear-probe evaluation are complete; pretrained features outperform random
-initialization on the standard probe protocol. Phase 3 (zero-shot causal
-masking) is the next milestone. Detailed experimental notes and results are
-tracked in the project notes alongside this repository.
+Active research. Phase 1 self-supervised pretraining, Phase 2 few-shot
+linear-probe evaluation across N ∈ {5, 10, 20, 50, 100}, and a fully-supervised
+nnU-Net 2D reference baseline are all complete; pretrained features outperform
+random initialization on the standard linear-probe protocol with a monotonically
+growing gap, and a label-efficient framing positions the SSL features against
+the supervised ceiling. Phase 3 (zero-shot causal masking) is a planned
+methods extension. Detailed experimental notes and results are tracked in
+the project notes alongside this repository.
 
 ## References
 
