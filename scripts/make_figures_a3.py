@@ -55,6 +55,24 @@ COL_RANDOM  = "#7B7B7B"   # gray: random init
 COL_NNUNET  = "#525252"   # dark gray: nnU-Net reference line
 
 
+def _readme_clean(ax):
+    """README-friendly polish: drop the (redundant) title, despine top/right,
+    subtle y-only grid, frameless legend, slightly larger labels. Keeps a WHITE
+    background (not transparent) so the axis text and grey reference lines stay
+    readable in GitHub light + dark mode and in the paper."""
+    ax.set_title("")
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.grid(True, axis="y", alpha=0.25, linewidth=0.6)
+    ax.grid(False, axis="x")
+    ax.xaxis.label.set_size(11)
+    ax.yaxis.label.set_size(11)
+    ax.tick_params(labelsize=10)
+    leg = ax.get_legend()
+    if leg is not None:
+        leg.set_frame_on(False)
+
+
 # ---------------------------------------------------------------------------
 # Data loading
 # ---------------------------------------------------------------------------
@@ -161,11 +179,10 @@ def fig1_data_efficiency(runs_root, out):
     ax.set_xticklabels([str(n) for n in Ns])
     ax.set_xlabel("Number of labeled training volumes (log scale)")
     ax.set_ylabel("Linear-probe mean foreground Dice")
-    ax.set_title("Data efficiency under linear probing")
-    ax.legend(loc="upper left", fontsize=9, framealpha=0.95)
-    ax.grid(True, alpha=0.3)
+    ax.legend(loc="upper left", fontsize=9)
+    _readme_clean(ax)
     fig.tight_layout()
-    fig.savefig(out / "fig1_data_efficiency_linprobe.png", dpi=150)
+    fig.savefig(out / "fig1_data_efficiency_linprobe.png", dpi=160)
     fig.savefig(out / "fig1_data_efficiency_linprobe.pdf")
     plt.close(fig)
     print(f"  saved {out}/fig1_data_efficiency_linprobe.{{png,pdf}}")
@@ -233,11 +250,10 @@ def fig3_loo_ablation(runs_root, out):
     ax.set_xticklabels([str(n) for n in Ns])
     ax.set_xlabel("Number of labeled training volumes (log scale)")
     ax.set_ylabel("Linear-probe mean foreground Dice")
-    ax.set_title("LOO ablation: I-JEPA design choices don't transfer to medical CT")
-    ax.legend(loc="upper left", fontsize=9, framealpha=0.95)
-    ax.grid(True, alpha=0.3)
+    ax.legend(loc="upper left", fontsize=9)
+    _readme_clean(ax)
     fig.tight_layout()
-    fig.savefig(out / "fig3_loo_ablation.png", dpi=150)
+    fig.savefig(out / "fig3_loo_ablation.png", dpi=160)
     fig.savefig(out / "fig3_loo_ablation.pdf")
     plt.close(fig)
     print(f"  saved {out}/fig3_loo_ablation.{{png,pdf}}")
