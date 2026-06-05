@@ -1,10 +1,17 @@
 import os, glob, re, argparse
 import torch
 import torch.nn.functional as F
+import torch.multiprocessing as mp
 from torch.utils.data import DataLoader
 from torch.amp import autocast, GradScaler
 from src.data.dataset import SliceTriplet
 from src.models.jepa import ZMWM_JEPA
+
+# Switch from default 'file_descriptor' to 'file_system' to avoid hitting the
+# OS open-file-descriptor cap when DataLoader workers share tensors via fd.
+# Default 'file_descriptor' was crashing one worker per ~400 steps on this box
+# with errno 24 ("Too many open files") under SliceTriplet's mmap-heavy loader.
+mp.set_sharing_strategy('file_system')
 
 KEEP = 3
 SAVE_EVERY = 500
@@ -64,22 +71,47 @@ def main():
     ap.add_argument("--epochs", type=int, default=40)
     ap.add_argument("--mask_mode", choices=["block", "random"], default="block",
                     help="block = I-JEPA-style rectangular targets (default); "
-                         "random = legacy per-patch mask (v1 behavior)")
+                         "random = legacy per-patch mask (v1 behavior, LOO A1)")
     ap.add_argument("--mask_ratio", type=float, default=None,
                     help="Default: 0.4 for block, 0.75 for random")
     ap.add_argument("--n_blocks", type=int, default=4,
                     help="Number of rectangular target blocks (block mode only)")
+    # ---- LOO ablation flags (added 2026-05-16) ----
+    ap.add_argument("--out_dir", type=str, default="checkpoints",
+                    help="Where to save checkpoints. Use a per-LOO-run dir "
+                         "(e.g. checkpoints/loo_a1_random_mask) so runs don't "
+                         "overwrite each other.")
+    ap.add_argument("--data_root", type=str, default="data/slices/train",
+                    help="Slice directory for SliceTriplet. Default: CT train slices.")
+    ap.add_argument("--k_range", type=int, nargs=2, default=[8, 20],
+                    metavar=("KMIN", "KMAX"),
+                    help="Context-target slice gap range. v2 default (8,20). "
+                         "LOO A3 = (3,7) (narrow gap, v1 behavior).")
+    ap.add_argument("--no_augment", action="store_true",
+                    help="Disable paired hflip + crop-resize + intensity jitter. "
+                         "LOO A4.")
     args = ap.parse_args()
 
     if args.mask_ratio is None:
         args.mask_ratio = 0.4 if args.mask_mode == "block" else 0.75
     print(f"[cfg] mask_mode={args.mask_mode} mask_ratio={args.mask_ratio} "
           f"n_blocks={args.n_blocks}", flush=True)
+    print(f"[cfg] data_root={args.data_root} k_range={tuple(args.k_range)} "
+          f"augment={not args.no_augment}", flush=True)
+    print(f"[cfg] out_dir={args.out_dir}", flush=True)
 
     device = "cuda"
-    ds = SliceTriplet()
+    ds = SliceTriplet(root=args.data_root,
+                      k_range=tuple(args.k_range),
+                      augment=not args.no_augment)
+    # Hardened DataLoader config (2026-05-19, post-3rd-crash):
+    # - num_workers=2: halves multiprocessing pressure (fewer fds, less IPC, less RAM).
+    # - pin_memory=False: bypasses the background pin-memory thread that crashed
+    #   when the system cleaned up shm files mid-run. ~5-10% slower step throughput
+    #   but eliminates a class of crashes worth far more than the perf cost on this box.
+    # - persistent_workers still True (small startup-cost win, ~5-10s per epoch).
     dl = DataLoader(ds, batch_size=32, shuffle=True,
-                    num_workers=4, pin_memory=True, persistent_workers=True,
+                    num_workers=2, pin_memory=False, persistent_workers=True,
                     prefetch_factor=2)
     model = ZMWM_JEPA(mask_ratio=args.mask_ratio,
                       mask_mode=args.mask_mode,
@@ -95,7 +127,7 @@ def main():
     if args.resume:
         global_step, start_epoch = load_ckpt(args.resume, model, opt, device)
 
-    os.makedirs("checkpoints", exist_ok=True)
+    os.makedirs(args.out_dir, exist_ok=True)
     model.train()
     for epoch in range(start_epoch, args.epochs):
         opt.zero_grad()
@@ -116,11 +148,11 @@ def main():
             if step % 50 == 0:
                 print(f"ep{epoch} step{step} gstep{global_step} loss={loss.item()*accum:.4f}", flush=True)
             if global_step % SAVE_EVERY == 0:
-                p = f"checkpoints/vit_step{global_step:07d}.pt"
+                p = f"{args.out_dir}/vit_step{global_step:07d}.pt"
                 save_ckpt(p, model, opt, global_step, epoch)
-                rotate("checkpoints/vit_step*.pt")
-        save_ckpt(f"checkpoints/vit_ep{epoch:03d}.pt", model, opt, global_step, epoch)
-        rotate("checkpoints/vit_ep*.pt")
+                rotate(f"{args.out_dir}/vit_step*.pt")
+        save_ckpt(f"{args.out_dir}/vit_ep{epoch:03d}.pt", model, opt, global_step, epoch)
+        rotate(f"{args.out_dir}/vit_ep*.pt")
 
 if __name__ == "__main__":
     main()

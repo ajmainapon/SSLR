@@ -33,3 +33,8 @@ __pycache__/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Cross-dataset / MRI data dirs (2026-06-05)
+/amos/
+/data_amos/
+/data_mri/
