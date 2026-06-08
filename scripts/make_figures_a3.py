@@ -168,7 +168,7 @@ def fig1_data_efficiency(runs_root, out):
     fig, ax = plt.subplots(figsize=(6.5, 4.5))
     ax.plot(Ns, a3,  "o-",  label="A3 SSL (multi-block mask + narrow k)",
             color=COL_A3,     linewidth=2.0, markersize=8)
-    ax.plot(Ns, v2,  "s--", label="v2 SSL (I-JEPA-inspired baseline)",
+    ax.plot(Ns, v2,  "s--", label="I-JEPA-CT SSL (baseline)",
             color=COL_V2,     linewidth=1.5, markersize=7, alpha=0.85)
     ax.plot(Ns, rnd, "v:",  label="Random init",
             color=COL_RANDOM, linewidth=1.5, markersize=7, alpha=0.85)
@@ -246,7 +246,7 @@ def fig3_loo_ablation(runs_root, out):
     a5 = [_a5(n) for n in Ns]
 
     fig, ax = plt.subplots(figsize=(6.5, 4.5))
-    ax.plot(Ns, v2, "s--", label="v2 (multi-block mask + wide k, I-JEPA-inspired)",
+    ax.plot(Ns, v2, "s--", label="I-JEPA-CT (multi-block mask + wide k)",
             color=COL_V2, linewidth=1.5, markersize=7)
     ax.plot(Ns, a1, "^-",  label="A1 (random mask + wide k)",
             color=COL_A1, linewidth=1.5, markersize=7)
