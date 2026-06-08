@@ -51,6 +51,7 @@ NNUNET_MEAN_FG = 0.8058
 COL_A3      = "#2E86AB"   # blue: A3 (the headline)
 COL_V2      = "#A23B72"   # purple: v2 (I-JEPA baseline)
 COL_A1      = "#F18F01"   # orange: A1 (random masking ablation)
+COL_A5      = "#3FA34D"   # green: a5 (both inversions — non-additive)
 COL_RANDOM  = "#7B7B7B"   # gray: random init
 COL_NNUNET  = "#525252"   # dark gray: nnU-Net reference line
 
@@ -236,12 +237,24 @@ def fig3_loo_ablation(runs_root, out):
     v2 = [best_val_fg(runs_root / f"lin_v2_ssl_n{n}")    for n in Ns]
     a1 = [best_val_fg(runs_root / f"lin_loo_a1_n{n}")    for n in Ns]
     a3 = [best_val_fg(runs_root / f"lin_loo_a3_n{n}")    for n in Ns]
+    def _a5(n):  # a5 (random mask + narrow k) — run naming varies; try both
+        for name in (f"lin_a5_n{n}", f"lin_loo_a5_n{n}"):
+            v = best_val_fg(runs_root / name)
+            if v is not None:
+                return v
+        return None
+    a5 = [_a5(n) for n in Ns]
 
     fig, ax = plt.subplots(figsize=(6.5, 4.5))
     ax.plot(Ns, v2, "s--", label="v2 (multi-block mask + wide k, I-JEPA-inspired)",
             color=COL_V2, linewidth=1.5, markersize=7)
     ax.plot(Ns, a1, "^-",  label="A1 (random mask + wide k)",
             color=COL_A1, linewidth=1.5, markersize=7)
+    if all(v is not None for v in a5):
+        ax.plot(Ns, a5, "D--", label="a5 (both inversions: random mask + narrow k)",
+                color=COL_A5, linewidth=1.5, markersize=6)
+    else:
+        print("  [fig3] WARN: a5 runs not found — plotting without a5")
     ax.plot(Ns, a3, "o-",  label="A3 (multi-block mask + narrow k)",
             color=COL_A3, linewidth=2.0, markersize=8)
 
