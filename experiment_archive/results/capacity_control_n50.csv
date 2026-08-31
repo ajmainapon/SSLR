@@ -1,0 +1,9 @@
+encoder,head,initialization,n,mean,std,relative_ssl_vs_random_percent,matched_factorial
+frozen,linear,ssl,50,0.2083,0.0066,113.9,true
+frozen,linear,random,50,0.0974,0.0014,,true
+frozen,conv,ssl,50,0.3308,0.0049,21.1,true
+frozen,conv,random,50,0.2731,0.0092,,true
+trainable,linear,ssl,50,0.4970,0.0048,18.5,true
+trainable,linear,random,50,0.4195,0.0118,,true
+trainable,conv,ssl,50,0.5426,0.0042,8.5,true
+trainable,conv,random,50,0.5003,0.0078,,true

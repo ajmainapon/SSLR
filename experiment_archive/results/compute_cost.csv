@@ -1,0 +1,9 @@
+task,model,protocol,n,hardware,unit,median,q1,q3,scope_note
+pretraining,A3,I-JEPA,unlabeled,RTX_3090_Ti,hours,96,,,40-epoch backbone pretraining
+training,A3,frozen_linear,50,RTX_3090_Ti,minutes,23.8,23.3,24.2,per downstream run
+training,A3,frozen_conv,50,RTX_3090_Ti,minutes,24.8,24.2,25.5,per downstream run
+training,A3,fine_tune_conv,50,RTX_3090_Ti,minutes,54.7,52.5,55.2,per downstream run
+training,A3,fine_tune_linear,50,RTX_5090,minutes,29.3,28.8,30.1,per downstream run
+training,SwinUNETR,fine_tune_ssl,50,RTX_3090_Ti,minutes,57.4,55.2,57.5,per downstream run
+inference,A3,frozen,all,RTX_3090_Ti,seconds_per_89_volumes,27.313,,,25578 preprocessed slices; 0.307 s/volume; 936.5 slices/s
+inference,A3,fine_tune,all,RTX_3090_Ti,seconds_per_89_volumes,32.220,,,25578 preprocessed slices; 0.362 s/volume; 793.9 slices/s

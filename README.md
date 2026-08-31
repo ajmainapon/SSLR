@@ -88,9 +88,10 @@ with organ size and intensity contrast.
 ### Cross-architecture corroboration — matched SwinUNETR fine-tune
 
 3D SwinUNETR (~5× more pretraining CT), fine-tuned under the **same recipe**, **beats A3 on absolute
-Dice by 8–17%** (it is 3D and far more pretrained — we do *not* claim parity). The keeper finding is
-**corroboration**: its within-method SSL-vs-random gap **collapses with N** (+7.7% → +0.83% →
-parity), independently reproducing A3's fine-tune law on a different architecture.
+Dice** (it is 3D and far more pretrained — we do *not* claim parity). The keeper finding is
+**corroboration**: in the completed four-seed comparison, its within-method SSL-vs-random gap
+declines from **+17.9% at N = 20** to **+0.6% at N = 50** and **−1.5% at N = 100**,
+independently reproducing the label-dependent convergence on a different architecture.
 
 ### Cross-dataset & cross-modality transfer (frozen A3, 4 seeds)
 
@@ -134,6 +135,8 @@ scripts/
   queue_amos_linprobe.sh    AMOS-CT cross-dataset probe
   queue_mri_multiseed.sh    AMOS-MR cross-modality probe (4 seeds)
   eval_nnunet_predictions.py  supervised ceiling at 224×224
+  test_inference/           held-out-test evaluation harness (artifacts excluded)
+experiment_archive/        post-submission result tables, costs, and validity notes
 figures_a3/  result figures (PNG + PDF)
 ```
 
@@ -158,6 +161,7 @@ tractability.
 
 ## Caveats
 
-4 seeds for the headline fine-tune; single LR sweep (at N = 50, transferred to A3); SwinUNETR
-baseline single-seed (within-method SSL-vs-random is matched); cross-modality linear-probe-only and
-capped at 39 MR volumes. A3 eval is 2D slice-wise Dice vs 3D volume-wise for nnU-Net/SwinUNETR.
+4 seeds for the headline A3 and SwinUNETR comparisons; single LR sweep (at N = 50, transferred to
+A3); cross-modality linear-probe-only and capped at 39 MR volumes. A3 eval is 2D slice-wise Dice vs
+3D volume-wise for nnU-Net/SwinUNETR. See [`experiment_archive/`](experiment_archive/) for the
+post-submission audit tables, compute measurements, and held-out-test validity notes.

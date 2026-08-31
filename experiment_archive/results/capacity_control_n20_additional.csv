@@ -1,0 +1,5 @@
+encoder,head,initialization,n,mean,std,relative_ssl_vs_random_percent,matched_factorial,note
+frozen,conv,ssl,20,0.2760,0.0176,25.7,false,different patient-list construction from trainable-linear cell
+frozen,conv,random,20,0.2195,0.0044,,false,different patient-list construction from trainable-linear cell
+trainable,linear,ssl,20,0.4495,0.0068,44.1,false,different patient-list construction from frozen-conv cell
+trainable,linear,random,20,0.3120,0.0263,,false,different patient-list construction from frozen-conv cell
