@@ -23,8 +23,8 @@ all 89 image/mask IDs match and every manifest artifact exists. The evaluator re
 historical batch size because the original metric averages batch-level Dice.
 
 Important validity note: the archived frozen-random test values are not reportable. Their encoder
-initialization order did not exactly reproduce training-time initialization. The A3 frozen and A3
-fine-tuned values in `experiment_archive/results/heldout_test_a3.csv` passed the locked-checkpoint
+initialization order did not exactly reproduce training-time initialization. The A2 frozen and A2
+fine-tuned values in `experiment_archive/results/heldout_test_a2.csv` passed the locked-checkpoint
 audit. Random fine-tuned weights were unavailable at archive time.
 
 The restoration script expects the official TotalSegmentator v2.01 archive and verifies its MD5 by

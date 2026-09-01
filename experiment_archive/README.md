@@ -11,7 +11,7 @@ are intentionally excluded from Git.
 - `results/capacity_control_n50.csv`: the matched 2×2 encoder/head capacity control at N=50.
 - `results/capacity_control_n20_additional.csv`: additional N=20 cells, with the cohort mismatch
   explicitly marked.
-- `results/heldout_test_a3.csv`: valid held-out-test results for the A3 frozen and fine-tuned arms.
+- `results/heldout_test_a2.csv`: valid held-out-test results for the A2 frozen and fine-tuned arms.
 - `results/compute_cost.csv`: measured wall-clock training and inference costs.
 - `../scripts/test_inference/`: source-only held-out-test evaluation harness.
 
@@ -25,7 +25,7 @@ The N=50 capacity table is the controlled factorial: the four cells use the matc
 The two additional N=20 cells were drawn from different stored patient-list constructions and must
 not be interpreted as a single controlled 2×2 factorial.
 
-Only A3 test-set values that passed the locked-checkpoint audit are included. Frozen-random test
+Only A2 test-set values that passed the locked-checkpoint audit are included. Frozen-random test
 outputs are excluded because the evaluator did not reproduce the training-time random encoder
 initialization order. Random fine-tune checkpoints were unavailable. Test-set values were never
 used for model or checkpoint selection.

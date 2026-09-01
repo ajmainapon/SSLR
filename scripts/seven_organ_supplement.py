@@ -50,7 +50,7 @@ for label, (ssl_p, rnd_p, idx) in {
     'TotalSeg': ('lin_loo_a3', 'lin_v2_random', TS_IDX),
     'AMOS-CT':  ('lin_amos_a3', 'lin_amos_random', AMOS_IDX),
 }.items():
-    for init, pre in (('A3 SSL', ssl_p), ('Random', rnd_p)):
+    for init, pre in (('A2 SSL', ssl_p), ('Random', rnd_p)):
         for N in (20, 50, 100):
             v = collect(pre, N, idx)
             if not v:
@@ -64,6 +64,6 @@ print()
 print(f"{'dataset':<12}{'N':>5}{'SSL':>9}{'Random':>9}{'delta rel':>11}")
 for label in ('TotalSeg', 'AMOS-CT'):
     for N in (20, 50, 100):
-        a = res.get((label, 'A3 SSL', N)); b = res.get((label, 'Random', N))
+        a = res.get((label, 'A2 SSL', N)); b = res.get((label, 'Random', N))
         if a and b:
             print(f'{label:<12}{N:>5}{a[0]:>9.4f}{b[0]:>9.4f}{100*(a[0]/b[0]-1):>10.1f}%')
